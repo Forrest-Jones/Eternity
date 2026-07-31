@@ -1,0 +1,26 @@
+name: Daily Commit
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update log file
+        run: |
+          mkdir -p .log
+          date -u +"%Y-%m-%dT%H:%M:%SZ" >> .log/commits.log
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .log/commits.log
+          git commit -m "chore: daily commit $(date -u +%Y-%m-%d)" || exit 0
+          git push
